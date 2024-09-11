@@ -1,3 +1,48 @@
+import sagemaker
+import boto3
+from sagemaker import get_execution_role
+from sagemaker.inputs import TrainingInput
+from sagemaker.estimator import Estimator
+from sagemaker.image_uris import retrieve
+
+# Initialize SageMaker session
+sess = sagemaker.Session()
+region = boto3.Session().region_name
+
+# Retrieve the linear learner container
+container = retrieve('linear-learner', region=region)
+
+# Define SageMaker Estimator for Linear Learner
+linear_estimator = Estimator(
+    image_uri=container,
+    role=get_execution_role(),
+    instance_count=1,
+    instance_type='ml.m4.xlarge',
+    output_path=f's3://{bucket}/{prefix}/output',
+    sagemaker_session=sess
+)
+
+# Set hyperparameters for Linear Learner
+linear_estimator.set_hyperparameters(
+    predictor_type='regressor',  # For linear regression
+    mini_batch_size=100,
+    epochs=100,
+    learning_rate=0.01,
+    normalize_data=True
+)
+
+# Define data channels for training and validation
+train_input = TrainingInput(s3_data=s3_input_train, content_type='text/csv')
+validation_input = TrainingInput(s3_data=s3_input_validation, content_type='text/csv')
+
+# Fit the model with training data
+linear_estimator.fit({'train': train_input, 'validation': validation_input})
+
+
+
+
+
+
 # Features and target variable
 X = data[['rooms', 'sqft']]
 y = data['price']
