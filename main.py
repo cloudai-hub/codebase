@@ -1,3 +1,31 @@
+# Features and target variable
+X = data[['rooms', 'sqft']]
+y = data['price']
+
+# Normalize the input features to range 0 to 1
+X_normalized = (X - X.min()) / (X.max() - X.min())
+
+# Combine the normalized features with the target variable and make 'price' the first column
+normalized_data = pd.concat([y, X_normalized], axis=1)
+
+# Shuffle the dataset
+normalized_data = normalized_data.sample(frac=1, random_state=42).reset_index(drop=True)
+
+# Split the dataset into training (80%) and validation (20%) sets
+train_size = int(0.8 * len(normalized_data))
+train_df = normalized_data[:train_size]
+val_df = normalized_data[train_size:]
+
+
+
+
+
+
+
+
+
+
+
 train_path = f"s3://{bucket}/{prefix}/train"
 validation_path = f"s3://{bucket}/{prefix}/validation"
 test_path = f"s3://{bucket}/{prefix}/test"
